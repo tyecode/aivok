@@ -18,6 +18,17 @@ Complete reference for every function, type, and option exported by aivok.
 | `ai.getStatus()` | All providers status | `Promise<ProviderStatus[]>` |
 | `ai.getSystemPrompt()` | Generated system prompt | `string` |
 | `ai.setPersona(persona)` | Update active persona | `void` |
+
+## Supported Providers
+
+| Provider | Key Name | Description |
+|---|---|---|
+| `gemini` | `GEMINI_API_KEY` | Google Gemini (default) |
+| `groq` | `GROQ_API_KEY` | Groq (fast inference) |
+| `anthropic` | `ANTHROPIC_API_KEY` | Anthropic Claude |
+| `mistral` | `MISTRAL_API_KEY` | Mistral AI |
+| `cohere` | `COHERE_API_KEY` | Cohere |
+| `openai-compatible` | custom | Ollama, OpenRouter, DeepSeek, etc. |
 | `ai.setModel(model)` | Change active model | `void` |
 
 ---
