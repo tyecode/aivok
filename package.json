@@ -1,0 +1,80 @@
+{
+  "name": "aivok",
+  "version": "1.0.0",
+  "description": "A free, lightweight JavaScript library for calling AI language models — zero boilerplate, automatic provider fallback, agentic tool loops, and custom AI personas.",
+  "author": "Sengphachanh (@tyecode)",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "example:basic": "node examples/basic.js",
+    "example:chat": "node examples/chat.js",
+    "example:agent-files": "node examples/agent-files.js",
+    "example:agent-research": "node examples/agent-research.js",
+    "example:persona": "node examples/persona.js",
+    "prepublishOnly": "npm run build",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "ai",
+    "llm",
+    "gemini",
+    "groq",
+    "anthropic",
+    "mistral",
+    "cohere",
+    "openai",
+    "chatgpt",
+    "chat",
+    "agent",
+    "streaming",
+    "persona",
+    "free",
+    "no-credit-card"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tyecode/aivok.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tyecode/aivok/issues"
+  },
+  "homepage": "https://github.com/tyecode/aivok#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.2",
+    "@commitlint/config-conventional": "^20.5.0",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.6.0",
+    "dotenv": "^17.4.2",
+    "eslint": "^10.2.1",
+    "husky": "^9.1.7",
+    "tsup": "^8.3.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.0",
+    "vitest": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
