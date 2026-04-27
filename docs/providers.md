@@ -47,12 +47,11 @@ const ai = createAivok({
 
 **Available models:**
 
-| Model | Context | Speed | Best for |
+| Model | Context | Speed | Free? |
 |---|---|---|---|
-| `gemini-2.0-flash` | 1M tokens | Fast | Default — best all-rounder |
-| `gemini-2.5-flash` | 1M tokens | Fast | Improved reasoning |
-| `gemini-2.5-pro` | 2M tokens | Slower | Hard tasks, long documents |
-| `gemini-1.5-flash` | 1M tokens | Fast | Fallback for compatibility |
+| `gemini-2.0-flash` | 1M tokens | Fast | ✅ Free |
+| `gemini-2.5-flash` | 1M tokens | Fast | ✅ Free |
+| `gemini-2.5-pro` | 2M tokens | Slower | ⚠️ Limited free |
 
 **Environment variable:**
 
@@ -95,13 +94,13 @@ const ai = createAivok({
 
 **Available free models:**
 
-| Model | Context | Speed | Best for |
+| Model | Context | Speed | Free? |
 |---|---|---|---|
-| `llama-3.3-70b-versatile` | 128K | Very fast | Best quality on Groq free tier |
-| `llama-3.1-8b-instant` | 128K | Fastest | Low-latency tasks |
-| `llama4-scout-17b-16e-instruct` | 128K | Fast | Efficient reasoning |
-| `gemma2-9b-it` | 8K | Fast | Lightweight tasks |
-| `mixtral-8x7b-32768` | 32K | Fast | Good quality, wide context |
+| `llama-3.3-70b-versatile` | 128K | Very fast | ✅ Free |
+| `llama-3.1-8b-instant` | 128K | Fastest | ✅ Free |
+| `llama4-scout-17b-16e-instruct` | 128K | Fast | ✅ Free |
+| `gemma2-9b-it` | 8K | Fast | ✅ Free |
+| `mixtral-8x7b-32768` | 32K | Fast | ✅ Free |
 
 **Environment variable:**
 
@@ -121,7 +120,7 @@ GROQ_API_KEY=your_key_here
 3. Click "Create Key" and copy it
 
 **Free tier limits:**
-- Limited free credits on signup
+- Limited free credits on signup (~$5 free)
 - No credit card required for initial use
 - Rate limits apply on free tier
 
@@ -139,11 +138,11 @@ const ai = createAivok({
 
 **Available models:**
 
-| Model | Context | Speed | Best for |
+| Model | Context | Speed | Free? |
 |---|---|---|---|
-| `claude-3-5-haiku-20241022` | 200K | Fast | Fast, affordable tasks |
-| `claude-3-5-sonnet-20241022` | 200K | Moderate | Balanced quality and speed |
-| `claude-3-opus-20240229` | 200K | Slower | Complex reasoning, deep analysis |
+| `claude-3-5-haiku-20241022` | 200K | Fast | ✅ Free credits |
+| `claude-3-5-sonnet-20241022` | 200K | Moderate | ❌ Paid |
+| `claude-3-opus-20240229` | 200K | Slower | ❌ Paid |
 
 **Environment variable:**
 
@@ -181,11 +180,11 @@ const ai = createAivok({
 
 **Available free models:**
 
-| Model | Context | Speed | Best for |
+| Model | Context | Speed | Free? |
 |---|---|---|---|
-| `mistral-small-latest` | 128K | Fast | General purpose, efficient |
-| `open-mistral-nemo` | 128K | Fast | Lightweight, multilingual |
-| `codestral-latest` | 32K | Moderate | Code generation and completion |
+| `mistral-small-latest` | 128K | Fast | ✅ Free |
+| `open-mistral-nemo` | 128K | Fast | ✅ Free |
+| `codestral-latest` | 32K | Moderate | ⚠️ Limited free |
 
 **Environment variable:**
 
@@ -205,7 +204,7 @@ MISTRAL_API_KEY=your_key_here
 3. Copy your trial key
 
 **Free tier limits:**
-- Free trial credits on signup
+- Trial credits on signup (~$10)
 - No credit card required
 - Rate limits apply on trial tier
 
@@ -223,11 +222,11 @@ const ai = createAivok({
 
 **Available models:**
 
-| Model | Context | Speed | Best for |
+| Model | Context | Speed | Free? |
 |---|---|---|---|
-| `command-r-plus` | 128K | Moderate | RAG, search, enterprise tasks |
-| `command-r` | 128K | Fast | Efficient retrieval and generation |
-| `embed-v3` | — | Fast | Embeddings (not for chat) |
+| `command-r-plus` | 128K | Moderate | ⚠️ Trial credits |
+| `command-r` | 128K | Fast | ⚠️ Trial credits |
+| `embed-v3` | — | Fast | ⚠️ Trial credits |
 
 **Environment variable:**
 

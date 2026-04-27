@@ -392,6 +392,55 @@ console.log(ai.getUsage())
 
 ---
 
+## `ai.ping()`
+
+Tests the current provider's credentials and returns a health check result.
+
+```js
+const result = await ai.ping()
+console.log(result)
+// { ok: true, provider: 'gemini', latency: 123 }
+// or: { ok: false, provider: 'gemini', latency: 456, error: 'Quota exceeded' }
+```
+
+### Returns
+
+`Promise<{ ok: boolean, provider: string, latency: number, error?: string }>`
+
+- `ok` — Whether the provider responded successfully
+- `provider` — The provider name being used
+- `latency` — Response time in milliseconds
+- `error` — Error message if `ok: false`
+
+---
+
+## `ai.getStatus()`
+
+Returns health status for all configured providers.
+
+```js
+const status = await ai.getStatus()
+console.log(status)
+// [
+//   { name: 'gemini', model: 'gemini-2.0-flash', primary: true, healthy: false, error: 'Quota exceeded' },
+//   { name: 'groq', model: 'llama-3.3-70b-versatile', primary: false, healthy: true }
+// ]
+```
+
+### Returns
+
+`Promise<ProviderStatus[]>`
+
+Each provider returns:
+- `name` — Provider name
+- `model` — Model being used
+- `primary` — Whether this is the primary provider
+- `healthy` — Whether the provider is responding
+- `lastCheck` — Timestamp of last check
+- `error` — Error message if unhealthy
+
+---
+
 ## `ai.setPersona(persona)`
 
 Updates the active persona. Affects all subsequent calls until changed again.

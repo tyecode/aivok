@@ -6,9 +6,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-ready-blue.svg)](https://www.typescriptlang.org/)
 [![CI](https://github.com/tyecode/aivok/actions/workflows/ci.yml/badge.svg)](https://github.com/tyecode/aivok/actions)
 
-A free, lightweight JavaScript library for calling AI language models — with zero boilerplate, automatic provider fallback, agentic tool loops, and custom AI personas.
+A lightweight JavaScript library for calling AI language models — with zero boilerplate, automatic provider fallback, agentic tool loops, and custom AI personas.
 
-Built on free APIs (Google Gemini + Groq). No credit card required.
+Works with Gemini, Groq, Anthropic, Mistral, Cohere, OpenAI, Ollama, OpenRouter, and any OpenAI-compatible API.
 
 ---
 
@@ -46,16 +46,32 @@ const ai = createAivok()
 
 ---
 
-## Free API setup
+## Supported Providers
 
-| Provider | Free tier | Get key |
-|---|---|---|
-| **Gemini 2.0 Flash** | 15 RPM, forever | [aistudio.google.com](https://aistudio.google.com/) |
-| **Groq** | 30 RPM, forever | [console.groq.com](https://console.groq.com/) |
+aivok supports multiple AI providers. Choose based on your needs:
 
-No credit card needed for either. Add both to your `.env` and aivok uses them with automatic fallback.
+| Provider | Best for |
+|---|---|
+| **Gemini** | Large context, free tier |
+| **Groq** | Fast inference, free tier |
+| **Anthropic** | Claude models |
+| **Mistral** | Multilingual |
+| **Cohere** | Enterprise, RAG |
+| **OpenAI** | GPT models |
+| **OpenAI-compatible** | Ollama, OpenRouter, DeepSeek, xAI, custom |
+
+### Free Options
+
+For zero-cost usage:
+
+| Provider | Free tier |
+|---|---|
+| **Gemini** | 15 RPM, forever |
+| **Groq** | 30 RPM, forever |
 
 ---
+
+## Install
 
 ## Features
 

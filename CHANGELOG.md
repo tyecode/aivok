@@ -10,39 +10,14 @@ All notable changes to this project will be documented in this file.
 - **Smart memory** - Chat sessions auto-summarize long histories
 - **Streaming shorthand** - `ai.ask(prompt, { stream: fn })` as alternative to `ai.stream()`
 - **Health checks** - `ai.ping()` and `ai.getStatus()` for provider diagnostics
-- **New providers** - Anthropic, Mistral, and Cohere support
+- **Multi-provider support** - Gemini, Groq, Anthropic, Mistral, Cohere, OpenAI-compatible
 - **Provider fallback** - Automatic failover when rate limited
 - **Graceful degradation** - Tries all healthy providers before failing
+- **Persona system** - Custom AI identities with built-in presets (support, coder, tutor, writer)
+- **Agentic tool loops** - AI can use custom tools in a loop
+- **Retry with backoff** - Exponential backoff on failures
+- **Streaming responses** - Real-time output with callbacks
+- **JSON mode** - Structured JSON output
+- **TypeScript** - Full type definitions
 - **Integration tests** - Real API tests (skipped by default)
-
-### Changed
-- Updated default OpenAI model from `gpt-3.5-turbo` to `gpt-4o-mini`
-- Improved rate limit handling with per-provider cooldowns
-- Enhanced error messages for better debugging
-
-### Fixed
-- Gemini tool response name handling
-- Router primary provider sorting
-- JSON parsing regex for better extraction
-- Multiple minor bugs identified in code review
-
-### Removed
-- Unused `classifyError` function
-- Duplicate error code exports
-
----
-
-## [0.0.1] - 2026-04-?? (Initial release)
-
-### Added
-- Core API: `ai.ask()`, `ai.chat()`, `ai.stream()`, `ai.json()`, `ai.agent()`
-- Provider support: Gemini, Groq, OpenAI-compatible
-- Persona system with presets (support, coder, tutor, writer)
-- Agent tool loops
-- Retry with exponential backoff
-- Multi-provider routing with automatic fallback
-
----
-
-[1.0.0]: https://github.com/tyecode/aivok/compare/v0.0.1...v1.0.0
-[0.0.1]: https://github.com/tyecode/aivok/tree/v0.0.1
+- **Husky + commitlint** - Enforced conventional commit messages
