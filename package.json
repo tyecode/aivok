@@ -1,6 +1,6 @@
 {
   "name": "aivok",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A lightweight JavaScript library for calling AI language models — zero boilerplate, automatic provider fallback, agentic tool loops, and custom AI personas.",
   "author": "@tyecode",
   "license": "MIT",
