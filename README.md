@@ -24,14 +24,6 @@ A unified JavaScript/TypeScript library for calling AI language models — with 
 
 ---
 
-## Install
-
-```bash
-npm install aivok
-```
-
----
-
 ## Quick Start
 
 ### One-line setup (auto-detects API keys from `.env`)
@@ -162,7 +154,7 @@ const ai = createAivok({ ..., persona: personas.coder })
 | Guide | Description |
 |---|---|
 | [API Reference](docs/api.md) | Every function, parameter, and return type |
-| [Providers](docs/providers.md) | Setup guides, free API key instructions |
+| [Providers](docs/providers.md) | Setup guides and API key instructions |
 | [Agents](docs/agents.md) | Tool loop, tool definition format, examples |
 | [Personas](docs/personas.md) | Custom AI identities, presets |
 | [Examples](docs/examples.md) | Annotated copy-paste examples |
