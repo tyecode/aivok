@@ -49,9 +49,7 @@
     "chat",
     "agent",
     "streaming",
-    "persona",
-    "free",
-    "no-credit-card"
+    "persona"
   ],
   "repository": {
     "type": "git",

@@ -226,7 +226,7 @@ console.log(`Done in ${result.toolCalls} calls, ${result.elapsed}ms`)
 
 ```js
 const result = await ai.agent({
-  goal: 'Research top 3 free AI APIs and write summary to research.md',
+  goal: 'Research top 3 AI APIs and write summary to research.md',
   tools: { fetchURL: webTools.fetchURL, writeFile: fileTools.writeFile },
   maxSteps: 20,
 })
