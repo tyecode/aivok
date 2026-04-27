@@ -61,15 +61,15 @@ const ai = createAivok({
 
 ## Supported Providers
 
-| Provider | Best For | Free Tier |
-|---|---|---|
-| **Gemini** | Large context (1M tokens), free forever | 15 RPM |
-| **Groq** | Fast inference, free forever | 30 RPM |
-| **Anthropic** | Claude models, careful reasoning | ~$5 credits |
-| **Mistral** | Multilingual, efficient | Limited |
-| **Cohere** | Enterprise, RAG | Trial |
-| **OpenAI** | GPT models | Paid |
-| **OpenAI-compatible** | Ollama, OpenRouter, DeepSeek, xAI | Varies |
+| Provider | Description |
+|---|---|
+| **Gemini** | Google Gemini — large context window |
+| **Groq** | Groq — fast inference |
+| **Anthropic** | Anthropic Claude — careful reasoning |
+| **Mistral** | Mistral AI — multilingual |
+| **Cohere** | Cohere — enterprise, RAG |
+| **OpenAI** | OpenAI GPT models |
+| **OpenAI-compatible** | Ollama, OpenRouter, DeepSeek, xAI |
 
 See [docs/providers.md](docs/providers.md) for setup guides and API key instructions.
 
