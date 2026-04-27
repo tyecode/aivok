@@ -71,7 +71,7 @@ const ai = createAivok({
 | **OpenAI** | GPT models | Paid |
 | **OpenAI-compatible** | Ollama, OpenRouter, DeepSeek, xAI | Varies |
 
-See [docs/providers.md](docs/providers.md) for setup guides and API key获取 instructions.
+See [docs/providers.md](docs/providers.md) for setup guides and API key instructions.
 
 ---
 
