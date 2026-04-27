@@ -10,8 +10,6 @@
 
 A unified JavaScript/TypeScript library for calling AI language models — with zero boilerplate, automatic provider fallback, agentic tool loops, and custom AI personas.
 
-**Install:** `npm install aivok`
-
 </div>
 
 ---
@@ -27,6 +25,13 @@ A unified JavaScript/TypeScript library for calling AI language models — with 
 ---
 
 ## Quick Start
+
+```bash
+npm install aivok
+```
+
+```js
+import { createAivok } from 'aivok'
 
 ### One-line setup (auto-detects API keys from `.env`)
 
