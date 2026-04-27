@@ -10,6 +10,8 @@
 
 A unified JavaScript/TypeScript library for calling AI language models — with zero boilerplate, automatic provider fallback, agentic tool loops, and custom AI personas.
 
+**Install:** `npm install aivok`
+
 </div>
 
 ---
