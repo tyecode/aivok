@@ -1,23 +1,41 @@
-# API reference
+# API Reference
 
-Complete reference for every function exported by aivok.
+Complete reference for every function, type, and option exported by aivok.
 
 ---
 
-## `createAivok(config)`
+## Quick Reference
 
-The main factory function. Call this once per project to create a configured AI client.
+| Method | Description | Returns |
+|---|---|---|
+| `ai.ask(prompt, options?)` | Single-shot question | `Promise<string>` |
+| `ai.chat(options?)` | Multi-turn chat session | `ChatSession` |
+| `ai.stream(prompt, onChunk, options?)` | Streaming response | `Promise<string>` |
+| `ai.json(prompt, options?)` | Force JSON output | `Promise<object>` |
+| `ai.agent(options)` | Agentic tool loop | `Promise<AgentResult>` |
+| `ai.getUsage()` | Get token usage stats | `UsageStats` |
+| `ai.ping()` | Health check | `Promise<HealthResult>` |
+| `ai.getStatus()` | All providers status | `Promise<ProviderStatus[]>` |
+| `ai.getSystemPrompt()` | Generated system prompt | `string` |
+| `ai.setPersona(persona)` | Update active persona | `void` |
+| `ai.setModel(model)` | Change active model | `void` |
 
-### Zero-config
+---
 
-`config` is optional — call `createAivok()` with no arguments and it auto-detects API keys from environment variables:
+## `createAivok(config?)`
+
+The main factory function. Creates a configured AI client.
+
+### Zero-config (auto-detects from `.env`)
 
 ```js
 import { createAivok } from 'aivok'
-const ai = createAivok() // auto-detects GEMINI_API_KEY or GROQ_API_KEY from .env
+
+const ai = createAivok()
+// Auto-detects GEMINI_API_KEY or GROQ_API_KEY
 ```
 
-If both `GEMINI_API_KEY` and `GROQ_API_KEY` are present, it sets up multi-provider with automatic fallback.
+### Explicit configuration
 
 ```js
 import { createAivok } from 'aivok'
@@ -29,21 +47,21 @@ const ai = createAivok({
 })
 ```
 
-### Config options
+### Configuration options
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `provider` | `string` | auto-detected | `'gemini'`, `'groq'`, `'anthropic'`, `'mistral'`, `'cohere'`, or `'openai-compatible'` |
-| `model` | `string` | auto-detected | Model string for the chosen provider |
-| `apiKey` | `string` | auto-detected | API key for the provider |
-| `baseURL` | `string` | provider default | Override the API endpoint (for custom/proxy APIs) |
-| `providers` | `array` | — | Multi-provider config (overrides `provider`/`model`/`apiKey`) |
-| `system` | `string` | — | Global system prompt applied to all calls |
-| `persona` | `object` | — | Persona config (builds system prompt automatically) |
+| `provider` | `string` | auto | `'gemini'`, `'groq'`, `'anthropic'`, `'mistral'`, `'cohere'`, `'openai-compatible'` |
+| `model` | `string` | auto | Model string for the provider |
+| `apiKey` | `string` | auto | API key for the provider |
+| `baseURL` | `string` | provider default | Override API endpoint |
+| `providers` | `array` | — | Multi-provider config with fallback |
+| `system` | `string` | — | Global system prompt |
+| `persona` | `object` | — | Persona config (auto-generates system prompt) |
 | `temperature` | `number` | `0.7` | Default temperature (0.0–2.0) |
 | `maxTokens` | `number` | `1024` | Default max output tokens |
-| `timeout` | `number` | `30000` | Request timeout in milliseconds |
-| `retries` | `number` | `3` | Max retry attempts on failure |
+| `timeout` | `number` | `30000` | Request timeout (ms) |
+| `retries` | `number` | `3` | Max retry attempts |
 | `retryDelay` | `number` | `1000` | Base delay (ms) for exponential backoff |
 
 ### Multi-provider config
@@ -72,7 +90,7 @@ When `providers` is set, aivok tries the `primary: true` provider first and fall
 
 ## `ai.ask(prompt, options?)`
 
-Single-shot question. Sends one message, returns one response string.
+Single-shot question. Sends one message, returns one response.
 
 ```js
 const reply = await ai.ask('Explain async/await in JavaScript')
@@ -82,14 +100,14 @@ const reply = await ai.ask('Explain async/await in JavaScript')
 
 | Param | Type | Description |
 |---|---|---|
-| `prompt` | `string` | The user message to send |
-| `options.system` | `string` | Override system prompt for this call only |
-| `options.model` | `string` | Override model for this call only |
-| `options.temperature` | `number` | Override temperature for this call only |
-| `options.maxTokens` | `number` | Override max tokens for this call only |
-| `options.persona` | `object` | Override persona for this call only |
-| `options.signal` | `AbortSignal` | Abort signal to cancel the request |
-| `options.stream` | `boolean \| function` | Stream the response. `true` streams to stdout, or pass a callback for each chunk |
+| `prompt` | `string` | The user message |
+| `options.system` | `string` | Override system prompt for this call |
+| `options.model` | `string` | Override model for this call |
+| `options.temperature` | `number` | Override temperature |
+| `options.maxTokens` | `number` | Override max tokens |
+| `options.persona` | `object` | Override persona for this call |
+| `options.signal` | `AbortSignal` | Abort signal to cancel request |
+| `options.stream` | `boolean \| function` | Enable streaming |
 
 ### Returns
 
@@ -97,34 +115,27 @@ const reply = await ai.ask('Explain async/await in JavaScript')
 
 ### Streaming shorthand
 
-Instead of calling `ai.stream()` separately, you can stream directly from `ask()`:
-
 ```js
-// Stream with a callback (same as ai.stream)
+// Stream with callback
 const reply = await ai.ask('Tell me a story', {
   stream: (chunk) => process.stdout.write(chunk),
 })
 
-// Stream without a callback — returns the full response after streaming completes
+// Stream without callback — returns full response
 const reply = await ai.ask('Tell me a story', { stream: true })
 ```
 
-### Example
+### Examples
 
 ```js
 // Simple question
 const answer = await ai.ask('What is the capital of France?')
 
-// With per-call overrides
+// With overrides
 const review = await ai.ask('Review this code:\n' + code, {
   model:       'gemini-2.5-pro',
   temperature: 0.1,
-  system:      'You are a strict code reviewer. Be direct.',
-})
-
-// Streaming shorthand
-const story = await ai.ask('Write a short story', {
-  stream: (chunk) => process.stdout.write(chunk),
+  system:      'You are a strict code reviewer.',
 })
 ```
 
@@ -132,12 +143,12 @@ const story = await ai.ask('Write a short story', {
 
 ## `ai.chat(options?)`
 
-Creates a multi-turn chat session that maintains conversation history.
+Creates a multi-turn chat session with conversation history.
 
 ```js
 const session = ai.chat()
 const reply1 = await session.send('Hello, who are you?')
-const reply2 = await session.send('What did I just ask you?')
+const reply2 = await session.send('What did I just ask?')
 ```
 
 ### Options
@@ -146,67 +157,59 @@ const reply2 = await session.send('What did I just ask you?')
 |---|---|---|---|
 | `system` | `string` | — | System prompt for this session |
 | `persona` | `object` | — | Persona for this session |
-| `model` | `string` | — | Model override for this session |
-| `temperature` | `number` | — | Temperature override for this session |
+| `model` | `string` | — | Model override |
+| `temperature` | `number` | — | Temperature override |
 | `history` | `array` | — | Pre-load conversation history |
-| `smartMemory` | `boolean \| number` | `false` | Auto-summarize chat history when it exceeds a threshold |
+| `smartMemory` | `boolean \| number` | `false` | Auto-summarize when history exceeds threshold |
 
 ### Session methods
 
 #### `session.send(message, options?)`
 
-Send a message and get a reply. History is maintained automatically.
-
-Returns `Promise<string>`.
+Send a message, returns `Promise<string>`. History is maintained automatically.
 
 #### `session.history()`
 
-Returns the full conversation history as an array of `{ role, content }` objects.
+Returns full conversation history as `[{ role, content }]`.
 
 #### `session.clear()`
 
-Clears the conversation history, starting a fresh session.
+Clears conversation history, starts fresh.
 
 #### `session.undo()`
 
-Removes the last complete exchange (one user message + one AI reply) from history. Calling it again removes the exchange before that.
+Removes the last exchange (user message + AI reply).
 
-### Example
+### Examples
 
 ```js
 const session = ai.chat({
-  persona: {
-    name: 'Nova',
-    role: 'a helpful portfolio assistant',
-  },
+  persona: { name: 'Nova', role: 'portfolio assistant' },
 })
 
-const r1 = await session.send('What projects have you worked on?')
-const r2 = await session.send('Tell me more about the second one')
-const r3 = await session.send('What tech stack did that use?')
+await session.send('What projects have you worked on?')
+await session.send('Tell me more about the second one')
 
-console.log(session.history()) // full conversation
+console.log(session.history())
 ```
 
 ### Smart memory
 
-When enabled, the chat session automatically summarizes older messages when the conversation exceeds a threshold. This keeps context within token limits without losing important information.
+When enabled, automatically summarizes older messages when conversation exceeds threshold.
 
 ```js
-const session = ai.chat({ smartMemory: true })          // summarize after 20 messages (default)
-const session = ai.chat({ smartMemory: 10 })            // summarize after 10 messages
+const session = ai.chat({ smartMemory: true })   // default threshold: 20 messages
+const session = ai.chat({ smartMemory: 10 })     // custom threshold
 ```
-
-When history exceeds the threshold, aivok calls the AI to summarize the older messages and replaces them with a single summary. The most recent messages are kept intact.
 
 ---
 
 ## `ai.stream(prompt, onChunk, options?)`
 
-Streaming response — calls `onChunk` with each text chunk as it arrives.
+Streaming response — calls `onChunk` with each text chunk.
 
 ```js
-await ai.stream('Write a short story about robots', (chunk) => {
+await ai.stream('Write a story', (chunk) => {
   process.stdout.write(chunk)
 })
 ```
@@ -216,32 +219,21 @@ await ai.stream('Write a short story about robots', (chunk) => {
 | Param | Type | Description |
 |---|---|---|
 | `prompt` | `string` | The user message |
-| `onChunk` | `function` | Called with each text chunk as `string` |
-| `options` | `object` | Same options as `ask()` |
+| `onChunk` | `function` | Callback for each chunk |
+| `options` | `object` | Same as `ask()` |
 
 ### Returns
 
-`Promise<string>` — the full concatenated response (after streaming completes).
-
-### Example with UI update
-
-```js
-let fullText = ''
-
-await ai.stream('Explain machine learning', (chunk) => {
-  fullText += chunk
-  document.getElementById('output').textContent = fullText
-})
-```
+`Promise<string>` — full concatenated response after streaming completes.
 
 ---
 
 ## `ai.json(prompt, options?)`
 
-Forces structured JSON output. Automatically parses the response and throws if parsing fails.
+Forces structured JSON output. Automatically parses response.
 
 ```js
-const data = await ai.json('List 3 JavaScript frameworks with name and year')
+const data = await ai.json('List 3 JS frameworks with name and year')
 // Returns: [{ name: 'React', year: 2013 }, ...]
 ```
 
@@ -249,9 +241,9 @@ const data = await ai.json('List 3 JavaScript frameworks with name and year')
 
 | Param | Type | Description |
 |---|---|---|
-| `prompt` | `string` | The user message — describe the JSON structure you want |
-| `options` | `object` | Same options as `ask()` |
-| `options.schema` | `object` | Optional JSON schema hint to include in the prompt |
+| `prompt` | `string` | Describe the JSON structure you want |
+| `options` | `object` | Same as `ask()` |
+| `options.schema` | `object` | Optional JSON schema hint |
 
 ### Returns
 
@@ -259,89 +251,73 @@ const data = await ai.json('List 3 JavaScript frameworks with name and year')
 
 ### Throws
 
-`Error` if the AI response cannot be parsed as valid JSON.
-
-### Example
-
-```js
-const result = await ai.json(`
-  Return a JSON object with:
-  - languages: array of top 5 programming languages
-  - each with: name (string), year (number), paradigm (string)
-`)
-
-console.log(result.languages[0].name) // 'JavaScript'
-```
+`PARSE_ERROR` if response cannot be parsed as valid JSON.
 
 ---
 
 ## `ai.agent(options)`
 
-Runs an agentic loop — the AI reasons, calls tools, sees results, and repeats until done.
+Runs an agentic loop — AI reasons, calls tools, sees results, repeats until done.
 
 ```js
 const result = await ai.agent({
-  goal:  'Read package.json, bump the patch version, save it back',
+  goal: 'Read package.json, bump version, save it',
   tools: {
-    readFile:  { description: '...', params: { path: 'string' }, run: async ({ path }) => ... },
-    writeFile: { description: '...', params: { path: 'string', content: 'string' }, run: async ({ path, content }) => ... },
+    readFile:  { description: 'Read a file', params: { path: 'string' }, run: async ({ path }) => ... },
+    writeFile: { description: 'Write a file', params: { path: 'string', content: 'string' }, run: async ({ path, content }) => ... },
   },
 })
 
-console.log(result.answer) // AI's final message
-console.log(result.steps)  // audit trail
+console.log(result.answer)
+console.log(result.steps)   // audit trail
 ```
 
 ### Options
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `goal` | `string` | required | The task you want the agent to accomplish |
-| `tools` | `object` | required | Tool definitions (see [Agents](agents.md)) |
-| `maxSteps` | `number` | `20` | Safety limit — stops loop after this many tool calls |
-| `system` | `string` | — | Additional system instructions for the agent |
-| `persona` | `object` | — | Persona override for the agent |
-| `onStep` | `function` | — | Callback called after each tool execution |
-| `model` | `string` | — | Model override for the agent |
+| `goal` | `string` | required | Task to accomplish |
+| `tools` | `object` | required | Tool definitions |
+| `maxSteps` | `number` | `20` | Safety limit for tool calls |
+| `system` | `string` | — | Additional system instructions |
+| `persona` | `object` | — | Persona override |
+| `onStep` | `function` | — | Callback after each tool execution |
+| `model` | `string` | — | Model override |
 
 ### Returns
-
-`Promise<AgentResult>` where `AgentResult` is:
 
 ```js
 {
   answer:    string,          // AI's final text response
   steps:     AgentStep[],     // full audit trail
-  toolCalls: number,          // total tool calls made
-  elapsed:   number,          // total time in milliseconds
+  toolCalls: number,          // total tool calls
+  elapsed:   number,          // total time in ms
 }
 ```
 
-Each `AgentStep`:
+### AgentStep structure
 
 ```js
 {
   type:    'tool_call' | 'tool_result' | 'thinking' | 'done',
-  tool:    string,            // tool name (if type is tool_call/tool_result)
-  input:   object,            // arguments passed to the tool
-  result:  string,            // what the tool returned
-  elapsed: number,            // time for this step in ms
+  tool:    string,            // tool name
+  input:   object,            // arguments passed
+  result:  string,            // tool's return value
+  elapsed: number,            // step time in ms
 }
 ```
 
 ### onStep callback
 
 ```js
-const result = await ai.agent({
+await ai.agent({
   goal: '...',
   tools,
   onStep: (step) => {
-    if (step.type === 'tool_call') {
-      console.log(`Calling: ${step.tool}(${JSON.stringify(step.input)})`)
-    }
-    if (step.type === 'tool_result') {
-      console.log(`Result: ${step.result.slice(0, 100)}...`)
-    }
+    if (step.type === 'tool_call')
+      console.log(`→ ${step.tool}(${JSON.stringify(step.input)})`)
+    if (step.type === 'tool_result')
+      console.log(`  ← ${step.result.slice(0, 100)}...`)
   },
 })
 ```
@@ -350,27 +326,23 @@ const result = await ai.agent({
 
 ## `ai.getSystemPrompt()`
 
-Returns the generated system prompt string that aivok will send to the AI. Useful for debugging your persona or seeing what prompt gets built.
+Returns the generated system prompt. Useful for debugging personas.
 
 ```js
 const ai = createAivok({
   provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-  persona: { name: 'Byte', role: 'a senior engineer', tone: 'direct' },
+  persona: { name: 'Byte', role: 'senior engineer', tone: 'direct' },
 })
 
 console.log(ai.getSystemPrompt())
 // "You are Byte, a senior engineer.\n\nTone: direct\n\nStay in character..."
 ```
 
-This is also useful if you set both `system` and `persona` — it shows the combined prompt.
-
 ---
 
 ## `ai.getUsage()`
 
-Returns token usage statistics for the current session.
+Returns token usage statistics for the session.
 
 ```js
 const usage = ai.getUsage()
@@ -378,7 +350,9 @@ console.log(usage)
 // { requests: 5, inputTokens: 1234, outputTokens: 567, totalTokens: 1801 }
 ```
 
-All fields are cumulative across `ask()`, `json()`, and `agent()` calls. Streaming does not track tokens (providers don't return usage in stream mode).
+Cumulative across `ask()`, `json()`, and `agent()` calls. Streaming does not track tokens.
+
+---
 
 ## `ai.resetUsage()`
 
@@ -394,23 +368,18 @@ console.log(ai.getUsage())
 
 ## `ai.ping()`
 
-Tests the current provider's credentials and returns a health check result.
+Tests current provider's credentials with a health check.
 
 ```js
 const result = await ai.ping()
 console.log(result)
 // { ok: true, provider: 'gemini', latency: 123 }
-// or: { ok: false, provider: 'gemini', latency: 456, error: 'Quota exceeded' }
+// { ok: false, provider: 'gemini', latency: 456, error: 'Quota exceeded' }
 ```
 
 ### Returns
 
 `Promise<{ ok: boolean, provider: string, latency: number, error?: string }>`
-
-- `ok` — Whether the provider responded successfully
-- `provider` — The provider name being used
-- `latency` — Response time in milliseconds
-- `error` — Error message if `ok: false`
 
 ---
 
@@ -429,31 +398,29 @@ console.log(status)
 
 ### Returns
 
-`Promise<ProviderStatus[]>`
-
-Each provider returns:
-- `name` — Provider name
-- `model` — Model being used
-- `primary` — Whether this is the primary provider
-- `healthy` — Whether the provider is responding
-- `lastCheck` — Timestamp of last check
-- `error` — Error message if unhealthy
+`Promise<ProviderStatus[]>` — each provider returns:
+- `name` — provider name
+- `model` — model being used
+- `primary` — whether primary provider
+- `healthy` — whether responding
+- `lastCheck` — timestamp of last check
+- `error` — error message if unhealthy
 
 ---
 
 ## `ai.setPersona(persona)`
 
-Updates the active persona. Affects all subsequent calls until changed again.
+Updates the active persona. Affects all subsequent calls.
 
 ```js
 ai.setPersona({
   name: 'Byte',
-  role: 'a senior software engineer',
+  role: 'senior software engineer',
   tone: 'direct and technical',
 })
 ```
 
-See [Personas](personas.md) for the full persona schema.
+See [docs/personas.md](personas.md) for full schema.
 
 ---
 
@@ -467,56 +434,43 @@ ai.setModel('gemini-2.5-pro')
 
 ---
 
-## `personas`
+## Personas
 
-Pre-built persona presets. Import as a namespace or individually.
+Pre-built persona presets.
 
 ```js
 import { createAivok, personas } from 'aivok'
 
 const ai = createAivok({
   provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-  persona:  personas.support,
+  persona:  personas.support,  // support | coder | tutor | writer
 })
 ```
 
-Or import individual presets:
+Or import individually:
 
 ```js
 import { createAivok, coder, tutor } from 'aivok'
 
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-  persona:  coder,
-})
+const ai = createAivok({ ..., persona: coder })
 ```
-
-Available presets: `personas.support`, `personas.coder`, `personas.tutor`, `personas.writer` (or `support`, `coder`, `tutor`, `writer` as named imports).
 
 ---
 
-## Error handling
+## Error Handling
 
-All methods throw errors with a `code` property and a descriptive `message`. Wrap in try/catch:
+All methods throw errors with a `code` property. Wrap in try/catch:
 
 ```js
 try {
   const reply = await ai.ask('Hello')
 } catch (err) {
-  if (err.code === 'RATE_LIMIT') {
-    // Hit rate limit on all providers — wait and retry
-  }
-  if (err.code === 'AUTH_ERROR') {
-    // Invalid API key
-  }
-  if (err.code === 'MAX_STEPS') {
-    // Agent exceeded maxSteps without finishing
-    console.log(err.steps) // partial audit trail still available
-  }
+  if (err.code === 'RATE_LIMIT')   console.log('All providers rate limited')
+  if (err.code === 'AUTH_ERROR')    console.log('Invalid API key')
+  if (err.code === 'TIMEOUT')       console.log('Request timed out')
+  if (err.code === 'MAX_STEPS')     console.log('Agent exceeded maxSteps', err.steps)
+  if (err.code === 'PARSE_ERROR')   console.log('Invalid JSON response')
+  if (err.code === 'PROVIDER_ERROR') console.log('Provider error', err.message)
 }
 ```
 

@@ -1,10 +1,10 @@
 # Examples
 
-Annotated, copy-paste ready examples for common use cases.
+Copy-paste ready examples for common use cases.
 
 ---
 
-## 1. Basic question and answer
+## 1. Basic Question
 
 ```js
 import 'dotenv/config'
@@ -16,89 +16,64 @@ const ai = createAivok({
   apiKey:   process.env.GEMINI_API_KEY,
 })
 
-const answer = await ai.ask('What is the difference between null and undefined in JavaScript?')
+const answer = await ai.ask('What is the difference between null and undefined?')
 console.log(answer)
 ```
 
 ---
 
-## 2. Multi-turn chat
+## 2. Multi-Turn Chat
 
 ```js
 import 'dotenv/config'
 import { createAivok } from 'aivok'
 
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-})
+const ai = createAivok({ provider: 'gemini', model: 'gemini-2.0-flash', apiKey: process.env.GEMINI_API_KEY })
 
-const session = ai.chat({
-  system: 'You are a helpful JavaScript tutor.',
-})
+const session = ai.chat({ system: 'You are a helpful JavaScript tutor.' })
 
-// Each message remembers what was said before
 console.log(await session.send('What is a closure?'))
 console.log(await session.send('Can you show me an example?'))
-console.log(await session.send('When would I actually use this in real code?'))
-
-// See the full history
+console.log(await session.send('When would I use this in real code?'))
 console.log(session.history())
 ```
 
 ---
 
-## 3. Streaming response
+## 3. Streaming Response
 
 ```js
 import 'dotenv/config'
 import { createAivok } from 'aivok'
 
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-})
+const ai = createAivok({ provider: 'gemini', model: 'gemini-2.0-flash', apiKey: process.env.GEMINI_API_KEY })
 
-// Stream prints each chunk as it arrives — great for long responses
 process.stdout.write('Answer: ')
-await ai.stream(
-  'Explain how React\'s reconciliation algorithm works in detail',
-  (chunk) => process.stdout.write(chunk)
-)
-console.log() // newline at end
+await ai.stream('Explain React reconciliation in detail', (chunk) => process.stdout.write(chunk))
+console.log()
 ```
 
 ---
 
-## 4. Structured JSON output
+## 4. Structured JSON
 
 ```js
 import 'dotenv/config'
 import { createAivok } from 'aivok'
 
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-})
+const ai = createAivok({ provider: 'gemini', model: 'gemini-2.0-flash', apiKey: process.env.GEMINI_API_KEY })
 
-// Force JSON output and auto-parse it
 const frameworks = await ai.json(`
-  Return a JSON array of the top 5 JavaScript frameworks in 2026.
-  Each item should have: name, githubStars (approximate), primaryUseCase, learningCurve (easy/medium/hard)
+  Return JSON array of top 5 JS frameworks in 2026.
+  Each: name, githubStars, primaryUseCase, learningCurve (easy/medium/hard)
 `)
 
-// frameworks is already a parsed JavaScript array
-frameworks.forEach(f => {
-  console.log(`${f.name} — ${f.primaryUseCase} (${f.learningCurve})`)
-})
+frameworks.forEach(f => console.log(`${f.name} — ${f.primaryUseCase} (${f.learningCurve})`))
 ```
 
 ---
 
-## 5. Custom persona — portfolio assistant
+## 5. Custom Persona
 
 ```js
 import 'dotenv/config'
@@ -108,64 +83,42 @@ const ai = createAivok({
   provider: 'gemini',
   model:    'gemini-2.0-flash',
   apiKey:   process.env.GEMINI_API_KEY,
-
   persona: {
     name: 'Nova',
-    role: 'a helpful assistant for Sengphachanh\'s developer portfolio',
-    tone: 'friendly, concise, enthusiastic about tech',
-    rules: [
-      'only answer questions about the portfolio and its projects',
-      'keep answers under 3 sentences for simple questions',
-      'if asked about hiring, mention the contact form',
-    ],
-    context: `
-      Sengphachanh is a full-stack developer from Vientiane, Laos.
-      He works with React, Next.js, and Node.js.
-      Key projects: crypto payment system, Discord bot, temple finance tracker.
-    `,
+    role: 'assistant for Sengphachanh\'s portfolio',
+    tone: 'friendly, concise',
+    rules: ['only discuss portfolio and projects', 'keep answers short'],
+    context: 'Full-stack dev from Laos. Works with React, Next.js, Node.js.',
   },
 })
 
 const chat = ai.chat()
 console.log(await chat.send('Who are you?'))
 console.log(await chat.send('What projects has he built?'))
-console.log(await chat.send('Is he available for hire?'))
 ```
 
 ---
 
-## 6. Multi-provider with automatic fallback
+## 6. Multi-Provider Fallback
 
 ```js
 import 'dotenv/config'
 import { createAivok } from 'aivok'
 
-// Uses Gemini first, falls back to Groq on rate limit
 const ai = createAivok({
   providers: [
-    {
-      name:    'gemini',
-      model:   'gemini-2.0-flash',
-      apiKey:  process.env.GEMINI_API_KEY,
-      primary: true,
-    },
-    {
-      name:   'groq',
-      model:  'llama-3.3-70b-versatile',
-      apiKey: process.env.GROQ_API_KEY,
-    },
+    { name: 'gemini', model: 'gemini-2.0-flash', apiKey: process.env.GEMINI_API_KEY, primary: true },
+    { name: 'groq',  model: 'llama-3.3-70b-versatile', apiKey: process.env.GROQ_API_KEY },
   ],
 })
 
-// Behaves exactly like a single-provider setup
-// Rate limit handling is automatic and invisible
 const reply = await ai.ask('Explain the CAP theorem')
 console.log(reply)
 ```
 
 ---
 
-## 7. Agent — file organiser
+## 7. Agent — File Organizer
 
 ```js
 import 'dotenv/config'
@@ -173,109 +126,40 @@ import { createAivok } from 'aivok'
 import fs from 'fs'
 import path from 'path'
 
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-})
+const ai = createAivok({ provider: 'gemini', model: 'gemini-2.0-flash', apiKey: process.env.GEMINI_API_KEY })
 
 const result = await ai.agent({
-  goal: `
-    Look at the files in ./sample-downloads directory.
-    Organise them into subdirectories by file type:
-    - images (jpg, png, gif, webp) → ./sample-downloads/images/
-    - documents (pdf, doc, docx, txt) → ./sample-downloads/docs/
-    - code files (js, ts, py, html, css) → ./sample-downloads/code/
-    - everything else → ./sample-downloads/other/
-  `,
-
+  goal: 'Organise ./sample-downloads by type: images→./images, docs→./docs, code→./code',
   tools: {
-    listDir: {
-      description: 'List all files in a directory. Returns filenames separated by newlines.',
-      params: { path: 'string' },
-      run: async ({ path: p }) => {
-        try {
-          return fs.readdirSync(p).join('\n')
-        } catch {
-          return 'Directory not found or empty'
-        }
-      },
-    },
-    moveFile: {
-      description: 'Move a file to a new location, creating destination directories if needed.',
-      params: { from: 'string', to: 'string' },
-      run: async ({ from, to }) => {
-        try {
-          fs.mkdirSync(path.dirname(to), { recursive: true })
-          fs.renameSync(from, to)
-          return `Moved: ${from} → ${to}`
-        } catch (err) {
-          return `Failed to move: ${err.message}`
-        }
-      },
-    },
+    listDir: { description: 'List files in directory', params: { path: 'string' }, run: async ({ path }) => fs.readdirSync(path).join('\n') },
+    moveFile: { description: 'Move file to new location', params: { from: 'string', to: 'string' }, run: async ({ from, to }) => { fs.mkdirSync(path.dirname(to), { recursive: true }); fs.renameSync(from, to); return `Moved` } },
+    createFolder: { description: 'Create folder', params: { path: 'string' }, run: async ({ path }) => { fs.mkdirSync(path, { recursive: true }); return 'Created' } },
   },
-
   maxSteps: 50,
-
-  onStep: ({ type, tool, input, result }) => {
-    if (type === 'tool_call') {
-      console.log(`  → ${tool}(${JSON.stringify(input)})`)
-    }
-    if (type === 'tool_result') {
-      console.log(`    ✓ ${result}`)
-    }
-  },
+  onStep: ({ type, tool, input }) => type === 'tool_call' && console.log(`→ ${tool}(${JSON.stringify(input)})`),
 })
 
-console.log('\nDone!')
 console.log(result.answer)
-console.log(`\nStats: ${result.toolCalls} tool calls, ${result.elapsed}ms`)
+console.log(`${result.toolCalls} calls, ${result.elapsed}ms`)
 ```
 
 ---
 
-## 8. Agent — web research + save to file
+## 8. Agent — Web Research
 
 ```js
 import 'dotenv/config'
 import { createAivok } from 'aivok'
 import fs from 'fs'
 
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-})
+const ai = createAivok({ provider: 'gemini', model: 'gemini-2.0-flash', apiKey: process.env.GEMINI_API_KEY })
 
 const result = await ai.agent({
-  goal: 'Research what aivok is and write a one-paragraph summary to summary.txt',
-
+  goal: 'Research aivok and write a summary to summary.txt',
   tools: {
-    fetchURL: {
-      description: 'Fetch the text content of a web page. Returns up to 3000 characters.',
-      params: { url: 'string' },
-      run: async ({ url }) => {
-        try {
-          const res = await fetch(url)
-          const text = await res.text()
-          // Strip HTML tags roughly and cap length
-          return text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 3000)
-        } catch (err) {
-          return `Fetch failed: ${err.message}`
-        }
-      },
-    },
-    writeFile: {
-      description: 'Write text content to a file.',
-      params: { path: 'string', content: 'string' },
-      run: async ({ path, content }) => {
-        fs.writeFileSync(path, content, 'utf8')
-        return `Written to ${path}`
-      },
-    },
+    fetchURL: { description: 'Fetch web page', params: { url: 'string' }, run: async ({ url }) => (await fetch(url)).text().slice(0, 3000) },
+    writeFile: { description: 'Write file', params: { path: 'string', content: 'string' }, run: async ({ path, content }) => { fs.writeFileSync(path, content); return 'Written' } },
   },
-
   maxSteps: 10,
 })
 
@@ -284,35 +168,20 @@ console.log(result.answer)
 
 ---
 
-## 9. Agent — code bump version
+## 9. Agent — Bump Version
 
 ```js
 import 'dotenv/config'
 import { createAivok } from 'aivok'
 import fs from 'fs'
 
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-})
+const ai = createAivok({ provider: 'gemini', model: 'gemini-2.0-flash', apiKey: process.env.GEMINI_API_KEY })
 
 const result = await ai.agent({
-  goal: 'Read package.json, increment the patch version (e.g. 1.0.0 → 1.0.1), and write it back.',
+  goal: 'Read package.json, bump patch version, write back',
   tools: {
-    readFile: {
-      description: 'Read a file and return its contents.',
-      params: { path: 'string' },
-      run: async ({ path }) => fs.readFileSync(path, 'utf8'),
-    },
-    writeFile: {
-      description: 'Write content to a file.',
-      params: { path: 'string', content: 'string' },
-      run: async ({ path, content }) => {
-        fs.writeFileSync(path, content, 'utf8')
-        return `Written ${content.length} chars to ${path}`
-      },
-    },
+    readFile:  { description: 'Read file', params: { path: 'string' }, run: async ({ path }) => fs.readFileSync(path, 'utf8') },
+    writeFile: { description: 'Write file', params: { path: 'string', content: 'string' }, run: async ({ path, content }) => { fs.writeFileSync(path, content); return 'Written' } },
   },
   maxSteps: 5,
 })
@@ -322,7 +191,7 @@ console.log(result.answer)
 
 ---
 
-## 10. Using the presets
+## 10. Built-in Persona Presets
 
 ```js
 import 'dotenv/config'
@@ -335,78 +204,46 @@ const ai = createAivok({
   persona:  personas.coder,
 })
 
-// Byte the code reviewer is now active
 const review = await ai.ask(`
-  Review this function and tell me what's wrong with it:
-
-  function getUser(id) {
-    const users = db.query('SELECT * FROM users')
-    return users.find(u => u.id === id)
-  }
+  Review this:
+  function getUser(id) { return db.query('SELECT *').find(u => u.id === id) }
 `)
-
 console.log(review)
 ```
 
 ---
 
-## 11. Switching models per call
+## 11. Switch Models Per-Call
 
 ```js
 import 'dotenv/config'
 import { createAivok } from 'aivok'
 
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',  // cheap default
-  apiKey:   process.env.GEMINI_API_KEY,
-})
+const ai = createAivok({ provider: 'gemini', model: 'gemini-2.0-flash', apiKey: process.env.GEMINI_API_KEY })
 
-// Simple tasks use the default (fast, cheap)
-const summary = await ai.ask('Summarise this in one sentence: ' + longText)
-
-// Hard tasks use a smarter model
-const analysis = await ai.ask('Find all security vulnerabilities in this code:\n' + code, {
-  model: 'gemini-2.5-pro',
-})
+const summary = await ai.ask('Summarise: ' + longText)                    // cheap default
+const analysis = await ai.ask('Find bugs in:\n' + code, { model: 'gemini-2.5-pro' })  // smarter model
 ```
 
 ---
 
-## 12. Error handling
+## 12. Error Handling
 
 ```js
 import 'dotenv/config'
 import { createAivok } from 'aivok'
 
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-})
+const ai = createAivok({ provider: 'gemini', model: 'gemini-2.0-flash', apiKey: process.env.GEMINI_API_KEY })
 
 try {
-  const result = await ai.agent({
-    goal: 'Do something complex',
-    tools: { ... },
-    maxSteps: 10,
-  })
+  const result = await ai.agent({ goal: 'Complex task', tools: {...}, maxSteps: 10 })
   console.log(result.answer)
-
 } catch (err) {
   switch (err.code) {
-    case 'RATE_LIMIT':
-      console.log('Rate limited — wait a moment and try again')
-      break
-    case 'MAX_STEPS':
-      console.log('Agent hit step limit')
-      console.log('Partial steps:', err.steps)
-      break
-    case 'AUTH_ERROR':
-      console.log('Check your API key in .env')
-      break
-    default:
-      console.error('Unexpected error:', err.message)
+    case 'RATE_LIMIT':   console.log('Rate limited — wait and retry'); break
+    case 'MAX_STEPS':    console.log('Step limit', err.steps); break
+    case 'AUTH_ERROR':   console.log('Check API key'); break
+    default:             console.error(err.message)
   }
 }
 ```

@@ -1,41 +1,42 @@
-# Providers
+# Providers Guide
 
-How to get free API keys and configure each provider in aivok.
+How to configure each provider in aivok and get free API keys.
 
 ---
 
 ## Overview
 
-aivok supports six provider types:
-
-| Provider | Type | Free tier | Credit card | Best for |
+| Provider | Type | Free Tier | Credit Card | Best For |
 |---|---|---|---|---|
-| `gemini` | Native | Forever free | No | Primary provider, large context |
-| `groq` | Native | Forever free | No | Speed, fallback |
-| `anthropic` | Native | Limited free | No | Claude models, careful reasoning |
-| `mistral` | Native | Limited free | No | Multilingual, efficient |
-| `cohere` | Native | Trial free | No | RAG, search, enterprise |
-| `openai-compatible` | Generic | Varies | Varies | Ollama, OpenRouter, DeepSeek, xAI, custom |
+| **Gemini** | Native | Forever free | No | Primary provider, large context |
+| **Groq** | Native | Forever free | No | Speed, fallback |
+| **Anthropic** | Native | Limited | No | Claude models |
+| **Mistral** | Native | Limited | No | Multilingual |
+| **Cohere** | Native | Trial | No | Enterprise, RAG |
+| **OpenAI-compatible** | Generic | Varies | Varies | Ollama, OpenRouter, custom |
 
 ---
 
-## Gemini (recommended primary)
+## Gemini (Recommended Primary)
 
-**Get a free API key:** https://aistudio.google.com/
+### Get API Key
 
-1. Sign in with your Google account
-2. Click "Get API key" in the left sidebar
-3. Click "Create API key"
-4. Copy the key — you won't see it again
+1. Go to [ai.google.dev](https://aistudio.google.com/)
+2. Sign in with Google account
+3. Click **Get API key** in left sidebar
+4. Click **Create API key**
+5. Copy the key
 
-**Free tier limits:**
-- 15 requests per minute
-- 1,000,000 tokens per minute
-- 1,500 requests per day
-- No credit card required
-- No expiry
+### Free Tier Limits
 
-**Configuration:**
+| Limit | Value |
+|---|---|
+| Requests/minute | 15 |
+| Tokens/minute | 1,000,000 |
+| Requests/day | 1,500 |
+| Credit card | Not required |
+
+### Configuration
 
 ```js
 const ai = createAivok({
@@ -45,44 +46,42 @@ const ai = createAivok({
 })
 ```
 
-**Available models:**
+### Available Models
 
 | Model | Context | Speed | Free? |
 |---|---|---|---|
-| `gemini-2.0-flash` | 1M tokens | Fast | ✅ Free |
-| `gemini-2.5-flash` | 1M tokens | Fast | ✅ Free |
-| `gemini-2.5-pro` | 2M tokens | Slower | ⚠️ Limited free |
+| `gemini-2.0-flash` | 1M | Fast | ✅ |
+| `gemini-2.5-flash` | 1M | Fast | ✅ |
+| `gemini-2.5-pro` | 2M | Slower | ⚠️ Limited |
 
-**Environment variable:**
+### Environment
 
 ```bash
-# .env
 GEMINI_API_KEY=your_key_here
 ```
 
-**Rate limit handling:**
-
-Gemini's free tier allows 15 RPM. aivok automatically adds exponential backoff when it receives a 429. If you're making rapid calls, consider adding `retryDelay: 4000` to your config.
-
 ---
 
-## Groq (recommended fallback)
+## Groq (Recommended Fallback)
 
-**Get a free API key:** https://console.groq.com/
+### Get API Key
 
-1. Sign up with email — no credit card
-2. Go to API Keys in the sidebar
-3. Click "Create API Key"
-4. Copy the key
+1. Go to [console.groq.com](https://console.groq.com/)
+2. Sign up (no credit card)
+3. Go to **API Keys**
+4. Click **Create API Key**
+5. Copy the key
 
-**Free tier limits:**
-- 30 requests per minute
-- 6,000 tokens per minute
-- 500,000 tokens per day
-- Per-model limits (see Groq's rate limit page)
-- No credit card required
+### Free Tier Limits
 
-**Configuration:**
+| Limit | Value |
+|---|---|
+| Requests/minute | 30 |
+| Tokens/minute | 6,000 |
+| Tokens/day | 500,000 |
+| Credit card | Not required |
+
+### Configuration
 
 ```js
 const ai = createAivok({
@@ -92,20 +91,19 @@ const ai = createAivok({
 })
 ```
 
-**Available free models:**
+### Available Models
 
 | Model | Context | Speed | Free? |
 |---|---|---|---|
-| `llama-3.3-70b-versatile` | 128K | Very fast | ✅ Free |
-| `llama-3.1-8b-instant` | 128K | Fastest | ✅ Free |
-| `llama4-scout-17b-16e-instruct` | 128K | Fast | ✅ Free |
-| `gemma2-9b-it` | 8K | Fast | ✅ Free |
-| `mixtral-8x7b-32768` | 32K | Fast | ✅ Free |
+| `llama-3.3-70b-versatile` | 128K | Very fast | ✅ |
+| `llama-3.1-8b-instant` | 128K | Fastest | ✅ |
+| `llama4-scout-17b-16e-instruct` | 128K | Fast | ✅ |
+| `gemma2-9b-it` | 8K | Fast | ✅ |
+| `mixtral-8x7b-32768` | 32K | Fast | ✅ |
 
-**Environment variable:**
+### Environment
 
 ```bash
-# .env
 GROQ_API_KEY=your_key_here
 ```
 
@@ -113,18 +111,19 @@ GROQ_API_KEY=your_key_here
 
 ## Anthropic
 
-**Get a free API key:** https://console.anthropic.com/
+### Get API Key
 
-1. Sign up — no credit card required
-2. Go to API Keys in the dashboard
-3. Click "Create Key" and copy it
+1. Go to [console.anthropic.com](https://console.anthropic.com/)
+2. Sign up (no credit card required)
+3. Go to **API Keys**
+4. Click **Create Key**
+5. Copy the key
 
-**Free tier limits:**
-- Limited free credits on signup (~$5 free)
-- No credit card required for initial use
-- Rate limits apply on free tier
+### Free Tier
 
-**Configuration:**
+~$5 in free credits on signup. No credit card required.
+
+### Configuration
 
 ```js
 const ai = createAivok({
@@ -134,20 +133,17 @@ const ai = createAivok({
 })
 ```
 
-**Default model:** `claude-3-5-haiku-20241022`
-
-**Available models:**
+### Available Models
 
 | Model | Context | Speed | Free? |
 |---|---|---|---|
-| `claude-3-5-haiku-20241022` | 200K | Fast | ✅ Free credits |
+| `claude-3-5-haiku-20241022` | 200K | Fast | ✅ Credits |
 | `claude-3-5-sonnet-20241022` | 200K | Moderate | ❌ Paid |
-| `claude-3-opus-20240229` | 200K | Slower | ❌ Paid |
+| `claude-3-opus-20240229` | 200K | Slow | ❌ Paid |
 
-**Environment variable:**
+### Environment
 
 ```bash
-# .env
 ANTHROPIC_API_KEY=your_key_here
 ```
 
@@ -155,18 +151,15 @@ ANTHROPIC_API_KEY=your_key_here
 
 ## Mistral
 
-**Get a free API key:** https://console.mistral.ai/
+### Get API Key
 
-1. Sign up with email — no credit card
-2. Go to API Keys in the workspace settings
-3. Create a new key and copy it
+1. Go to [console.mistral.ai](https://console.mistral.ai/)
+2. Sign up with email
+3. Go to **API Keys** in workspace settings
+4. Create new key
+5. Copy the key
 
-**Free tier limits:**
-- Free models available
-- No credit card required
-- Rate limits apply on free tier
-
-**Configuration:**
+### Configuration
 
 ```js
 const ai = createAivok({
@@ -176,20 +169,17 @@ const ai = createAivok({
 })
 ```
 
-**Default model:** `mistral-small-latest`
-
-**Available free models:**
+### Available Models
 
 | Model | Context | Speed | Free? |
 |---|---|---|---|
-| `mistral-small-latest` | 128K | Fast | ✅ Free |
-| `open-mistral-nemo` | 128K | Fast | ✅ Free |
-| `codestral-latest` | 32K | Moderate | ⚠️ Limited free |
+| `mistral-small-latest` | 128K | Fast | ✅ |
+| `open-mistral-nemo` | 128K | Fast | ✅ |
+| `codestral-latest` | 32K | Moderate | ⚠️ Limited |
 
-**Environment variable:**
+### Environment
 
 ```bash
-# .env
 MISTRAL_API_KEY=your_key_here
 ```
 
@@ -197,18 +187,14 @@ MISTRAL_API_KEY=your_key_here
 
 ## Cohere
 
-**Get a free API key:** https://dashboard.cohere.com/
+### Get API Key
 
-1. Sign up — no credit card required
-2. Go to API Keys in the dashboard
-3. Copy your trial key
+1. Go to [dashboard.cohere.com](https://dashboard.cohere.com/)
+2. Sign up (no credit card)
+3. Go to **API Keys**
+4. Copy your trial key
 
-**Free tier limits:**
-- Trial credits on signup (~$10)
-- No credit card required
-- Rate limits apply on trial tier
-
-**Configuration:**
+### Configuration
 
 ```js
 const ai = createAivok({
@@ -218,28 +204,26 @@ const ai = createAivok({
 })
 ```
 
-**Default model:** `command-r-plus`
-
-**Available models:**
+### Available Models
 
 | Model | Context | Speed | Free? |
 |---|---|---|---|
-| `command-r-plus` | 128K | Moderate | ⚠️ Trial credits |
-| `command-r` | 128K | Fast | ⚠️ Trial credits |
-| `embed-v3` | — | Fast | ⚠️ Trial credits |
+| `command-r-plus` | 128K | Moderate | ⚠️ Trial |
+| `command-r` | 128K | Fast | ⚠️ Trial |
 
-**Environment variable:**
+### Environment
 
 ```bash
-# .env
 COHERE_API_KEY=your_key_here
 ```
 
 ---
 
-## Multi-provider setup (recommended for production)
+## Multi-Provider Setup (Recommended)
 
-Use both Gemini and Groq together. aivok automatically falls back to Groq when Gemini hits rate limits.
+## Multi-Provider Setup (Recommended)
+
+Use both Gemini and Groq together for automatic failover:
 
 ```js
 const ai = createAivok({
@@ -259,53 +243,33 @@ const ai = createAivok({
 })
 ```
 
-This effectively gives you:
-- 15 + 30 = 45 requests/minute
-- Automatic failover with no code changes
-- Both entirely free
+**Benefits:**
+- 15 + 30 = 45 requests/minute combined
+- Automatic failover on rate limit
+- Both free forever
 
 ---
 
-## OpenAI-compatible (generic adapter)
+## OpenAI-Compatible
 
-Any API that follows the OpenAI `/v1/chat/completions` format works with the `openai-compatible` provider.
+Works with any API following OpenAI's `/v1/chat/completions` format.
 
-```js
-const ai = createAivok({
-  provider: 'openai-compatible',
-  model:    'your-model-name',
-  apiKey:   'your-key',
-  baseURL:  'https://your-endpoint.com/v1',
-})
-```
+### Ollama (Local - Free)
 
-### Ollama (local models — completely free)
-
-Run open-source models on your own machine.
-
-1. Install Ollama: https://ollama.com/
+1. Install: [ollama.com](https://ollama.com/)
 2. Pull a model: `ollama pull llama3`
-3. Ollama runs on `http://localhost:11434` by default
+3. Runs on `http://localhost:11434`
 
 ```js
 const ai = createAivok({
   provider: 'openai-compatible',
   model:    'llama3',
-  apiKey:   'ollama',            // any string works — Ollama doesn't check
+  apiKey:   'ollama',  // any string works
   baseURL:  'http://localhost:11434/v1',
 })
 ```
 
-Recommended models for Ollama:
-- `llama3` — best general purpose
-- `qwen2.5:7b` — fast and capable
-- `phi3` — very small, great for simple tasks
-- `codellama` — good for code tasks
-- `mistral` — solid alternative to llama
-
-### OpenRouter (200+ models, one key)
-
-Access many models including paid ones (Claude, GPT-4, etc.) through a single API key. Has some free models.
+### OpenRouter (200+ Models)
 
 ```js
 const ai = createAivok({
@@ -316,12 +280,7 @@ const ai = createAivok({
 })
 ```
 
-Free models on OpenRouter: search for `:free` suffix at https://openrouter.ai/models
-
-### NVIDIA build.nvidia.com (1000 free API calls)
-
-1. Create account at https://build.nvidia.com/
-2. Generate an API key — 1000 calls free, no credit card
+### NVIDIA (1000 Free Calls)
 
 ```js
 const ai = createAivok({
@@ -332,23 +291,7 @@ const ai = createAivok({
 })
 ```
 
-### xAI Grok ($25 free credit)
-
-1. Create account at https://console.x.ai/
-2. $25 in free credits on signup, no credit card required for initial use
-
-```js
-const ai = createAivok({
-  provider: 'openai-compatible',
-  model:    'grok-3-fast',
-  apiKey:   process.env.XAI_API_KEY,
-  baseURL:  'https://api.x.ai/v1',
-})
-```
-
-### DeepSeek (very cheap, near-free)
-
-Not free but extremely low cost — $0.14 per million input tokens.
+### DeepSeek (Very Low Cost)
 
 ```js
 const ai = createAivok({
@@ -359,7 +302,7 @@ const ai = createAivok({
 })
 ```
 
-### Cloudflare Workers AI (free tier)
+### Cloudflare Workers AI (Free Tier)
 
 ```js
 const ai = createAivok({
@@ -372,38 +315,32 @@ const ai = createAivok({
 
 ---
 
-## Environment variable setup
+## Environment Setup
 
-Create a `.env` file at the root of your project:
+Create `.env` file:
 
 ```bash
-# .env — never commit this file to git
-
 # Primary (free forever)
-GEMINI_API_KEY=your_gemini_key_here
+GEMINI_API_KEY=your_gemini_key
 
 # Fallback (free forever)
-GROQ_API_KEY=your_groq_key_here
+GROQ_API_KEY=your_groq_key
 
-# Optional extras
+# Optional
 OPENROUTER_API_KEY=
 NVIDIA_API_KEY=
-XAI_API_KEY=
 DEEPSEEK_API_KEY=
-CF_API_TOKEN=
-CF_ACCOUNT_ID=
 ```
 
-Add `.env` to your `.gitignore`:
+Add to `.gitignore`:
 
 ```bash
-# .gitignore
 .env
 .env.local
 .env.*.local
 ```
 
-Load with `dotenv` in Node.js:
+Load in Node.js:
 
 ```bash
 npm install dotenv
@@ -413,22 +350,18 @@ npm install dotenv
 import 'dotenv/config'
 import { createAivok } from 'aivok'
 
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-})
+const ai = createAivok()
 ```
 
 ---
 
-## Choosing a provider
+## Choosing a Provider
 
-```
-Need the largest context window?     → Gemini 2.5 Pro (2M tokens)
-Need the fastest responses?         → Groq (llama-3.1-8b-instant)
-Need completely offline/private?    → Ollama (local)
-Need the most capable model free?   → Gemini 2.0 Flash + Groq fallback
-Need access to Claude/GPT-4?        → OpenRouter (some free, some paid)
-Building for production?            → Gemini primary + Groq fallback
-```
+| Need | Solution |
+|---|---|
+| Largest context | Gemini 2.5 Pro (2M tokens) |
+| Fastest responses | Groq |
+| Offline/private | Ollama (local) |
+| Most capable free | Gemini + Groq fallback |
+| Claude/GPT-4 | OpenRouter |
+| Production use | Gemini primary + Groq fallback |

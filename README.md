@@ -1,14 +1,26 @@
 # aivok
 
+<div align="center">
+
 [![npm version](https://img.shields.io/npm/v/aivok)](https://www.npmjs.com/package/aivok)
 [![npm downloads](https://img.shields.io/npm/dm/aivok)](https://www.npmjs.com/package/aivok)
 [![License](https://img.shields.io/npm/l/aivok)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-ready-blue.svg)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-3178c6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![CI](https://github.com/tyecode/aivok/actions/workflows/ci.yml/badge.svg)](https://github.com/tyecode/aivok/actions)
 
-A lightweight JavaScript library for calling AI language models — with zero boilerplate, automatic provider fallback, agentic tool loops, and custom AI personas.
+A unified JavaScript/TypeScript library for calling AI language models — with zero boilerplate, automatic provider fallback, agentic tool loops, and custom AI personas.
 
-Works with Gemini, Groq, Anthropic, Mistral, Cohere, OpenAI, Ollama, OpenRouter, and any OpenAI-compatible API.
+</div>
+
+---
+
+## Why aivok?
+
+- **One import, every provider** — Gemini, Groq, Anthropic, Mistral, Cohere, OpenAI, Ollama, OpenRouter, and any OpenAI-compatible API
+- **Zero boilerplate** — retries, rate limit backoff, message history, tool formatting handled automatically
+- **Provider-agnostic** — swap models by changing one config line
+- **TypeScript native** — full type safety, works seamlessly in JS and TS projects
+- **Zero runtime dependencies** — lightweight, auditable, no bloat
 
 ---
 
@@ -20,58 +32,48 @@ npm install aivok
 
 ---
 
-## Quick start
+## Quick Start
+
+### One-line setup (auto-detects API keys from `.env`)
 
 ```js
 import 'dotenv/config'
 import { createAivok } from 'aivok'
 
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,  // free at aistudio.google.com
-})
-
+const ai = createAivok()
 const answer = await ai.ask('Explain async/await in JavaScript')
 console.log(answer)
 ```
 
-Zero config — auto-detects keys from .env:
+### Explicit configuration
 
 ```js
-// Zero config — auto-detects keys from .env
 import { createAivok } from 'aivok'
-const ai = createAivok()
+
+const ai = createAivok({
+  provider: 'gemini',
+  model:    'gemini-2.0-flash',
+  apiKey:   process.env.GEMINI_API_KEY,
+})
 ```
 
 ---
 
 ## Supported Providers
 
-aivok supports multiple AI providers. Choose based on your needs:
+| Provider | Best For | Free Tier |
+|---|---|---|
+| **Gemini** | Large context (1M tokens), free forever | 15 RPM |
+| **Groq** | Fast inference, free forever | 30 RPM |
+| **Anthropic** | Claude models, careful reasoning | ~$5 credits |
+| **Mistral** | Multilingual, efficient | Limited |
+| **Cohere** | Enterprise, RAG | Trial |
+| **OpenAI** | GPT models | Paid |
+| **OpenAI-compatible** | Ollama, OpenRouter, DeepSeek, xAI | Varies |
 
-| Provider | Best for |
-|---|---|
-| **Gemini** | Large context, free tier |
-| **Groq** | Fast inference, free tier |
-| **Anthropic** | Claude models |
-| **Mistral** | Multilingual |
-| **Cohere** | Enterprise, RAG |
-| **OpenAI** | GPT models |
-| **OpenAI-compatible** | Ollama, OpenRouter, DeepSeek, xAI, custom |
-
-### Free Options
-
-For zero-cost usage:
-
-| Provider | Free tier |
-|---|---|
-| **Gemini** | 15 RPM, forever |
-| **Groq** | 30 RPM, forever |
+See [docs/providers.md](docs/providers.md) for setup guides and API key获取 instructions.
 
 ---
-
-## Install
 
 ## Features
 
@@ -85,47 +87,38 @@ const reply = await ai.ask('What is the capital of France?')
 
 ```js
 const session = ai.chat()
-const r1 = await session.send('Explain closures in JavaScript')
-const r2 = await session.send('Give me a real-world example')
+await session.send('Explain closures in JavaScript')
+await session.send('Give me a real-world example')
 ```
 
 ### Streaming
 
 ```js
-// Alias: stream from ask()
-const reply = await ai.ask('Write a short story', {
-  stream: (chunk) => process.stdout.write(chunk),
-})
-
-// Or use ai.stream() directly
-await ai.stream('Write a short story', (chunk) => process.stdout.write(chunk))
+await ai.stream('Write a story', (chunk) => process.stdout.write(chunk))
 ```
 
-### JSON output
+### Structured JSON
 
 ```js
-const data = await ai.json('List the top 5 JS frameworks with name and year created')
-// data is already a parsed JavaScript object
+const data = await ai.json('List 5 JS frameworks with name and year')
+// Returns parsed JavaScript object
 ```
 
-### AI persona
+### Custom persona
 
 ```js
 const ai = createAivok({
   provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-
   persona: {
     name:  'Nova',
-    role:  'a helpful assistant for my portfolio website',
+    role:  'a helpful portfolio assistant',
     tone:  'friendly and concise',
-    rules: ['only discuss my projects', 'keep answers short'],
+    rules: ['keep answers short', 'only discuss my projects'],
   },
 })
 ```
 
-### Automatic provider fallback
+### Provider fallback
 
 ```js
 const ai = createAivok({
@@ -134,23 +127,7 @@ const ai = createAivok({
     { name: 'groq',   model: 'llama-3.3-70b-versatile', apiKey: process.env.GROQ_API_KEY },
   ],
 })
-// Tries Gemini first, falls back to Groq on rate limit — automatically
-// Available providers: gemini, groq, anthropic, mistral, cohere, openai-compatible
-```
-
-### Usage tracking
-
-```js
-// Usage tracking
-const usage = ai.getUsage()
-console.log(usage) // { requests: 5, inputTokens: 1234, outputTokens: 567, totalTokens: 1801 }
-```
-
-### Smart memory
-
-```js
-// Smart memory — auto-summarizes long chats
-const session = ai.chat({ smartMemory: true })
+// Tries Gemini first, automatically falls back to Groq on rate limit
 ```
 
 ### Agentic tool loop
@@ -165,57 +142,57 @@ const result = await ai.agent({
   maxSteps: 5,
 })
 
-console.log(result.answer)
-console.log(result.steps)   // full audit trail
+console.log(result.answer)     // final response
+console.log(result.steps)      // audit trail
 ```
 
-### Custom API endpoint
-
-```js
-// Works with Ollama, OpenRouter, DeepSeek, xAI, or any OpenAI-compatible API
-const ai = createAivok({
-  provider: 'openai-compatible',
-  model:    'llama3',
-  apiKey:   'ollama',
-  baseURL:  'http://localhost:11434/v1',
-})
-```
-
----
-
-## Built-in persona presets
+### Built-in persona presets
 
 ```js
 import { createAivok, personas } from 'aivok'
 
-const ai = createAivok({
-  ...config,
-  persona: personas.coder,    // direct senior engineer
-  // or: personas.support     // friendly customer support
-  // or: personas.tutor       // patient teacher
-  // or: personas.writer      // sharp content editor
-})
+const ai = createAivok({ ..., persona: personas.coder })
+// personas.support | personas.tutor | personas.writer | personas.coder
 ```
 
 ---
 
 ## Documentation
 
-- [API reference](docs/api.md) — every function and parameter
-- [Providers](docs/providers.md) — provider setup, free API key guides
-- [Agents](docs/agents.md) — tool loop, tool definition format, examples
-- [Personas](docs/personas.md) — custom AI identities, presets
-- [Examples](docs/examples.md) — annotated copy-paste examples
+| Guide | Description |
+|---|---|
+| [API Reference](docs/api.md) | Every function, parameter, and return type |
+| [Providers](docs/providers.md) | Setup guides, free API key instructions |
+| [Agents](docs/agents.md) | Tool loop, tool definition format, examples |
+| [Personas](docs/personas.md) | Custom AI identities, presets |
+| [Examples](docs/examples.md) | Annotated copy-paste examples |
+
+---
+
+## Error Handling
+
+All methods throw errors with a `code` property:
+
+```js
+try {
+  const reply = await ai.ask('Hello')
+} catch (err) {
+  if (err.code === 'RATE_LIMIT')    console.log('All providers rate limited')
+  if (err.code === 'AUTH_ERROR')    console.log('Invalid API key')
+  if (err.code === 'MAX_STEPS')     console.log('Agent exceeded maxSteps')
+  if (err.code === 'PARSE_ERROR')   console.log('Invalid JSON response')
+}
+```
 
 ---
 
 ## Author
 
-Built by [@tyecode](https://github.com/tyecode) — Vientiane, Laos.
+Built by [@tyecode](https://github.com/tyecode) — Vientiane, Laos  
 Part of the [qodexlab](https://github.com/qodexlab) ecosystem.
 
 ---
 
 ## License
 
-MIT
+[MIT](LICENSE)

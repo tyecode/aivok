@@ -1,27 +1,22 @@
-# Agents — the agentic loop
+# Agents Guide
 
 How aivok's agent loop works, how to define tools, and real-world examples.
 
 ---
 
-## How the loop works
+## How It Works
 
-The agent loop is the mechanism that lets AI do multi-step work autonomously. Instead of answering once and stopping, the AI reasons about a goal, picks a tool to call, sees the result, then decides whether to call another tool or declare the task done.
+The agent loop enables AI to perform multi-step tasks autonomously. Instead of answering once and stopping, the AI:
 
-### The loop, step by step
+1. Receives a **goal** + a set of **tools**
+2. Reasons and either:
+   - **Calls a tool** → aivok runs your function, sends result back → AI continues
+   - **Declares done** → aivok returns the final answer + audit trail
 
-```
-1. You give the agent a goal + a set of tools
-2. aivok sends the goal to the AI (with tool definitions)
-3. AI reasons and either:
-   a. Calls a tool → aivok runs your function, sends result back → go to step 3
-   b. Says it's done → aivok returns the final answer + audit trail
-```
-
-Internally, this is what aivok manages for you:
+### Internal flow (what aivok handles for you)
 
 ```js
-// What aivok does internally (simplified)
+// Simplified internal implementation
 async function agentLoop(goal, tools, options) {
   const messages = [{ role: 'user', content: goal }]
 
@@ -40,11 +35,11 @@ async function agentLoop(goal, tools, options) {
         steps.push({ type: 'tool_call', tool: block.name, input: block.input, result })
 
         messages.push({ role: 'assistant', content: response.content })
-        messages.push({ role: 'user',      content: [{ type: 'tool_result', tool_use_id: block.id, content: String(result) }] })
+        messages.push({ role: 'user', content: [{ type: 'tool_result', tool_use_id: block.id, content: String(result) }] })
       }
     }
 
-    if (steps.length >= options.maxSteps) throw new Error('MAX_STEPS exceeded')
+    if (steps.length >= options.maxSteps) throw new Error('MAX_STEPS')
   }
 }
 ```
@@ -53,9 +48,9 @@ You never write this. `ai.agent()` wraps it entirely.
 
 ---
 
-## Defining tools
+## Defining Tools
 
-Every tool has three required fields:
+Every tool requires three fields:
 
 ```js
 const tools = {
@@ -65,74 +60,62 @@ const tools = {
       paramName: 'type',   // 'string', 'number', 'boolean', 'array', 'object'
     },
     run: async (input) => {
-      // your code here — receives { paramName: value }
+      // your code — receives { paramName: value }
       return 'string result'  // always return a string
     },
   },
 }
 ```
 
-### Full tool definition schema
+### Tool schema
 
-```js
-{
-  description: string,      // required — what it does, when to use it
-  params: {                 // required — what arguments the AI can pass
-    [name]: 'string' | 'number' | 'boolean' | 'array' | 'object'
-  },
-  required: string[],       // optional — which params are required (default: all)
-  run: async (input) => string,  // required — the actual function
-}
-```
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `description` | `string` | Yes | What it does, when to use it |
+| `params` | `object` | Yes | Arguments the AI can pass |
+| `required` | `string[]` | No | Required parameters |
+| `run` | `function` | Yes | The actual function |
 
 ### Writing good descriptions
 
 The description is the most important part. The AI decides whether to call your tool based on it.
 
-**Bad:**
-```js
-description: 'Read a file'
-```
+| Bad | Good |
+|---|---|
+| `"Read a file"` | `"Read the contents of a file. Use before editing to understand current content."` |
 
-**Good:**
-```js
-description: 'Read the contents of a file from the filesystem. Use this when you need to inspect code, config files, or any text file before making changes.'
-```
-
-Rules for good tool descriptions:
+**Rules:**
 - Say what it does AND when to use it
 - Mention what format the result is in
-- Warn about side effects (e.g. "this writes to disk", "this makes a network request")
-- Keep it under 100 words
+- Warn about side effects (e.g., "writes to disk")
+- Keep under 100 words
 
 ---
 
-## The three agent phases
+## Agent Phases
 
-Based on Anthropic's own agent design (used in Claude Code):
+Based on Anthropic's agent design:
 
 ### Phase 1: Gather context
-AI reads what it needs to understand the situation before acting.
+AI reads what it needs before acting.
 
-Tools for this phase: `readFile`, `listDir`, `fetchURL`, `searchCode`, `getState`
+**Tools:** `readFile`, `listDir`, `fetchURL`
 
 ### Phase 2: Take action
 AI makes changes based on what it learned.
 
-Tools for this phase: `writeFile`, `runCommand`, `callAPI`, `sendMessage`, `updateDB`
+**Tools:** `writeFile`, `runCommand`, `sendMessage`
 
 ### Phase 3: Verify results
-AI checks that the action worked correctly.
+AI checks that the action worked.
 
-Tools for this phase: `readFile` (re-read), `runTests`, `checkStatus`, `validateOutput`
-
-The loop cycles through these phases as many times as needed.
+**Tools:** `readFile`, `runTests`, `checkStatus`
 
 ---
 
-## Tool examples
+## Tool Examples
 
-### File system tools
+### File system
 
 ```js
 import fs from 'fs'
@@ -140,7 +123,7 @@ import path from 'path'
 
 const fileTools = {
   readFile: {
-    description: 'Read the contents of a file. Use before editing to understand current content.',
+    description: 'Read a file. Use before editing to understand current content.',
     params: { path: 'string' },
     run: async ({ path: filePath }) => {
       try {
@@ -152,86 +135,41 @@ const fileTools = {
   },
 
   writeFile: {
-    description: 'Write content to a file, creating it if it does not exist. Overwrites existing content.',
+    description: 'Write to a file, creating directories if needed. Overwrites existing.',
     params: { path: 'string', content: 'string' },
     run: async ({ path: filePath, content }) => {
       fs.mkdirSync(path.dirname(filePath), { recursive: true })
       fs.writeFileSync(filePath, content, 'utf8')
-      return `File written: ${filePath} (${content.length} characters)`
+      return `Written: ${filePath} (${content.length} chars)`
     },
   },
 
   listDir: {
-    description: 'List all files in a directory. Use to understand what files exist before reading or writing.',
+    description: 'List all files in a directory.',
     params: { path: 'string' },
     run: async ({ path: dirPath }) => {
       try {
-        const files = fs.readdirSync(dirPath)
-        return files.join('\n')
+        return fs.readdirSync(dirPath).join('\n')
       } catch {
         return `Error: directory not found at ${dirPath}`
       }
     },
   },
-
-  deleteFile: {
-    description: 'Delete a file permanently. Use only when explicitly asked to remove files.',
-    params: { path: 'string' },
-    run: async ({ path: filePath }) => {
-      try {
-        fs.unlinkSync(filePath)
-        return `Deleted: ${filePath}`
-      } catch {
-        return `Error: could not delete ${filePath}`
-      }
-    },
-  },
 }
 ```
 
-### Web tools
+### Web
 
 ```js
 const webTools = {
   fetchURL: {
-    description: 'Fetch the text content of a web page or API endpoint. Returns the raw text.',
+    description: 'Fetch text content from a web page or API.',
     params: { url: 'string' },
     run: async ({ url }) => {
       try {
         const res = await fetch(url)
         const text = await res.text()
-        return text.slice(0, 5000) // cap at 5000 chars to save tokens
-      } catch (err) {
-        return `Error fetching ${url}: ${err.message}`
-      }
-    },
-  },
-
-  fetchJSON: {
-    description: 'Fetch JSON data from an API endpoint. Returns the parsed JSON as a string.',
-    params: { url: 'string' },
-    run: async ({ url }) => {
-      const res = await fetch(url)
-      const data = await res.json()
-      return JSON.stringify(data, null, 2)
-    },
-  },
-}
-```
-
-### Shell tools
-
-```js
-import { execSync } from 'child_process'
-
-const shellTools = {
-  runCommand: {
-    description: 'Run a shell command and return its output. Use for build steps, tests, git operations. Avoid destructive commands.',
-    params: { command: 'string' },
-    run: async ({ command }) => {
-      try {
-        const output = execSync(command, { encoding: 'utf8', timeout: 30000 })
-        return output || '(no output)'
+        return text.slice(0, 5000) // cap to save tokens
       } catch (err) {
         return `Error: ${err.message}`
       }
@@ -240,29 +178,21 @@ const shellTools = {
 }
 ```
 
-### Database tools (example with SQLite)
+### Shell
 
 ```js
-import Database from 'better-sqlite3'
+import { execSync } from 'child_process'
 
-const db = new Database('data.db')
-
-const dbTools = {
-  query: {
-    description: 'Run a read-only SQL query on the database. Use to fetch data for analysis.',
-    params: { sql: 'string' },
-    run: async ({ sql }) => {
-      const rows = db.prepare(sql).all()
-      return JSON.stringify(rows, null, 2)
-    },
-  },
-
-  execute: {
-    description: 'Run a write SQL statement (INSERT, UPDATE, DELETE). Use when explicitly asked to modify data.',
-    params: { sql: 'string' },
-    run: async ({ sql }) => {
-      const info = db.prepare(sql).run()
-      return `Affected rows: ${info.changes}`
+const shellTools = {
+  runCommand: {
+    description: 'Run a shell command. Use for build steps, tests, git.',
+    params: { command: 'string' },
+    run: async ({ command }) => {
+      try {
+        return execSync(command, { encoding: 'utf8', timeout: 30000 }) || '(no output)'
+      } catch (err) {
+        return `Error: ${err.message}`
+      }
     },
   },
 }
@@ -270,101 +200,65 @@ const dbTools = {
 
 ---
 
-## Real-world agent examples
+## Examples
 
-### File organiser agent
+### File organizer
 
 ```js
-import { createAivok } from 'aivok'
-import fs from 'fs'
-import path from 'path'
-
-const ai = createAivok({
-  provider: 'gemini',
-  model:    'gemini-2.0-flash',
-  apiKey:   process.env.GEMINI_API_KEY,
-})
-
-const tools = {
-  listDir: {
-    description: 'List all files in a directory with their extensions.',
-    params: { path: 'string' },
-    run: async ({ path: p }) => fs.readdirSync(p).join('\n'),
-  },
-  moveFile: {
-    description: 'Move a file from one path to another, creating the destination directory if needed.',
-    params: { from: 'string', to: 'string' },
-    run: async ({ from, to }) => {
-      fs.mkdirSync(path.dirname(to), { recursive: true })
-      fs.renameSync(from, to)
-      return `Moved: ${from} → ${to}`
-    },
-  },
-  createFolder: {
-    description: 'Create a new folder at the given path.',
-    params: { path: 'string' },
-    run: async ({ path: p }) => {
-      fs.mkdirSync(p, { recursive: true })
-      return `Created folder: ${p}`
-    },
-  },
-}
-
 const result = await ai.agent({
-  goal: 'Organise the files in ./downloads by type. Put images in ./downloads/images, documents in ./downloads/docs, and code files in ./downloads/code.',
-  tools,
+  goal: 'Organise files in ./downloads by type: images→./images, docs→./docs, code→./code',
+  tools: {
+    listDir: { description: 'List files in directory', params: { path: 'string' }, run: async ({ path }) => fs.readdirSync(path).join('\n') },
+    moveFile: { description: 'Move file to new location', params: { from: 'string', to: 'string' }, run: async ({ from, to }) => { fs.mkdirSync(path.dirname(to), { recursive: true }); fs.renameSync(from, to); return `Moved: ${from} → ${to}` } },
+    createFolder: { description: 'Create folder', params: { path: 'string' }, run: async ({ path }) => { fs.mkdirSync(path, { recursive: true }); return `Created: ${path}` } },
+  },
   maxSteps: 50,
-  onStep: ({ type, tool, input }) => {
-    if (type === 'tool_call') console.log(`→ ${tool}(${JSON.stringify(input)})`)
+  onStep: (step) => {
+    if (step.type === 'tool_call') console.log(`→ ${step.tool}(${JSON.stringify(step.input)})`)
   },
 })
 
 console.log(result.answer)
-console.log(`Done in ${result.toolCalls} tool calls, ${result.elapsed}ms`)
+console.log(`Done in ${result.toolCalls} calls, ${result.elapsed}ms`)
 ```
 
 ### Research agent
 
 ```js
 const result = await ai.agent({
-  goal: 'Research the top 3 free AI APIs available in 2026 and write a markdown summary to research.md',
-  tools: {
-    fetchURL: webTools.fetchURL,
-    writeFile: fileTools.writeFile,
-  },
+  goal: 'Research top 3 free AI APIs and write summary to research.md',
+  tools: { fetchURL: webTools.fetchURL, writeFile: fileTools.writeFile },
   maxSteps: 20,
 })
 ```
 
-### Code review agent
+### Code review
 
 ```js
 const result = await ai.agent({
-  goal: 'Read all .js files in ./src, find any potential bugs or improvements, and write a review to review.md',
-  tools: {
-    listDir: fileTools.listDir,
-    readFile: fileTools.readFile,
-    writeFile: fileTools.writeFile,
-  },
-  system: 'You are a senior JavaScript engineer. Be specific, cite line numbers, and suggest fixes.',
+  goal: 'Read ./src/*.js files, find bugs, write review to review.md',
+  tools: { listDir: fileTools.listDir, readFile: fileTools.readFile, writeFile: fileTools.writeFile },
+  system: 'You are a senior JS engineer. Cite line numbers.',
   maxSteps: 30,
 })
 ```
 
 ---
 
-## Safety guidelines
+## Safety Guidelines
 
-- **Always set `maxSteps`** — prevents runaway loops. Default is 20, lower it for simple tasks.
-- **Handle errors in tool `run` functions** — return error strings instead of throwing; the AI can handle a graceful error and try a different approach.
-- **Be careful with destructive tools** — consider adding confirmation prompts before exposing `deleteFile` or `execute` (database writes) in production.
-- **Cap output from tools** — truncate large file contents or API responses to avoid blowing the context window.
-- **Log with `onStep`** — in production, always log agent steps so you can audit what it did.
+| Guideline | Why |
+|---|---|
+| **Always set `maxSteps`** | Prevents runaway loops |
+| **Handle errors in tools** | Return error strings, don't throw |
+| **Be careful with destructive tools** | Add confirmation prompts |
+| **Cap output** | Truncate large responses |
+| **Log with `onStep`** | Audit trail for debugging |
 
 ---
 
-## Anthropic's design principle
+## Design Principle
 
-From Anthropic's own research: *"agents are typically just LLMs using tools based on environmental feedback in a loop."* And: *"success in the LLM space isn't about building the most sophisticated system — it's about building the right system for your needs. Start with simple prompts, and add multi-step agentic systems only when simpler solutions fall short."*
+> *"Success in the LLM space isn't about building the most sophisticated system — it's about building the right system for your needs."* — Anthropic
 
-aivok follows this: `ai.ask()` for simple tasks, `ai.agent()` only when you genuinely need multi-step autonomous work.
+Start with `ai.ask()` for simple tasks. Use `ai.agent()` only when you genuinely need multi-step autonomous work.
