@@ -1,6 +1,6 @@
 # aivok — project context for Claude Code
 
-aivok is a free, open-source JavaScript library that provides a clean, unified API for calling AI language models (Gemini, Groq, and any OpenAI-compatible endpoint) with zero cost. It includes support for single-shot questions, multi-turn chat, streaming, structured JSON output, agentic tool-calling loops, and customisable AI personas.
+aivok is an open-source JavaScript library that provides a clean, unified API for calling AI language models (Gemini, Groq, and any OpenAI-compatible endpoint). It includes support for single-shot questions, multi-turn chat, streaming, structured JSON output, agentic tool-calling loops, and customisable AI personas.
 
 **Repository:** https://github.com/tyecode/aivok
 **Author:** Sengphachanh (@tyecode), Vientiane, Laos
