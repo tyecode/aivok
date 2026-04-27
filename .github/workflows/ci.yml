@@ -55,6 +55,4 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: |
-          echo "GEMINI_API_KEY=test" > .env
-          npm test -- --grep "Integration"
+        run: npm test -- --grep "Integration"
