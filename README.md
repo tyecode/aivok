@@ -188,8 +188,8 @@ try {
 
 ## Author
 
-Built by [@tyecode](https://github.com/tyecode) — Vientiane, Laos  
-Part of the [qodexlab](https://github.com/qodexlab) ecosystem.
+Built by [@tyecode](https://github.com/tyecode)  
+
 
 ---
 

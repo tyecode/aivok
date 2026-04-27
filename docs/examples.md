@@ -85,10 +85,10 @@ const ai = createAivok({
   apiKey:   process.env.GEMINI_API_KEY,
   persona: {
     name: 'Nova',
-    role: 'assistant for Sengphachanh\'s portfolio',
+    role: 'assistant for the portfolio',
     tone: 'friendly, concise',
     rules: ['only discuss portfolio and projects', 'keep answers short'],
-    context: 'Full-stack dev from Laos. Works with React, Next.js, Node.js.',
+    context: 'Full-stack developer. Works with React, Next.js, Node.js.',
   },
 })
 
